@@ -69,5 +69,6 @@ var (
 		},
 	}
 	DefaultVersion   = "last"
+	DefaultForce     = false
 	DefaultLocalPath = "./"
 )

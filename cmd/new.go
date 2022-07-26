@@ -2,24 +2,24 @@ package cmd
 
 import (
 	"errors"
+	"github.com/gookit/gcli/v3"
 	"github.com/manifoldco/promptui"
-	"github.com/spf13/cobra"
 	"pure-admin-cli/constants"
 	"pure-admin-cli/template"
 	"strconv"
 )
 
 var (
-	newCmd = &cobra.Command{
-		Use:   "new",
-		Short: "create a new project",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			return executeShell(cmd)
+	NewCmd = &gcli.Command{
+		Name: "new",
+		Desc: "create a new project",
+		Func: func(c *gcli.Command, args []string) error {
+			return executeShell(c)
 		},
 	}
 )
 
-func executeShell(cmd *cobra.Command) error {
+func executeShell(cmd *gcli.Command) error {
 	cmdModel := template.Command{}
 	projectNamePrompt := promptui.Prompt{
 		Label: "project name",

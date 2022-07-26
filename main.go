@@ -1,14 +1,21 @@
 package main
 
 import (
-	"fmt"
-	"os"
+	"github.com/gookit/gcli/v3"
 	"pure-admin-cli/cmd"
 )
 
+var (
+	version = "unknown"
+)
+
 func main() {
-	if err := cmd.Execute(); err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
+	app := gcli.NewApp(func(app *gcli.App) {
+		app.Version = version
+		app.Desc = "create pure-admin cli application"
+		app.Name = "pure"
+	})
+	app.AddCommand(cmd.InitCmd)
+	app.AddCommand(cmd.NewCmd)
+	app.Run(nil)
 }
