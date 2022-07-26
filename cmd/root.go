@@ -5,7 +5,12 @@ import (
 )
 
 var (
-	rootCmd = &cobra.Command{}
+	version = "unknown"
+	rootCmd = &cobra.Command{
+		Use:     "pure",
+		Short:   "pure admin cli",
+		Version: version,
+	}
 )
 
 func init() {

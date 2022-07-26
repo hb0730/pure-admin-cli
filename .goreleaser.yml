@@ -19,7 +19,7 @@ builds:
       - arm64
       - arm
     ldflags:
-      - -s -w -X main.version={{.Version}} -X main.builtBy=goreleaser
+      - -s -w -X pure-admin-cli/cmd.version={{.Version}} -X main.builtBy=goreleaser
     ignore:
       - goos: windows
         goarch: arm64
