@@ -3,103 +3,106 @@ package cmd
 import (
 	"errors"
 	"fmt"
-	"github.com/spf13/cobra"
+	"github.com/gookit/gcli/v3"
 	"pure-admin-cli/constants"
 	"pure-admin-cli/template"
-	"reflect"
 )
 
 var (
-	projectName     string
-	templateStr     string
-	templateRepo    string
-	templateVersion string
-	projectForce    bool
-	localPath       string
-	initCmd         = &cobra.Command{
-		Use:   "init",
-		Short: "create a new project",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			cmdModel := template.Command{}
-			value, err := cmd.Flags().GetString("name")
-			if err != nil {
-				return err
+	_answers = &constants.Answers{}
+	initCmd  = &gcli.Command{
+		Name: "init",
+		Desc: "create a new project",
+		Func: func(c *gcli.Command, args []string) error {
+			arg := c.Arg("name")
+			if arg == nil {
+				return errors.New("project name is required")
 			}
-			if len(value) == 0 {
-				return errors.New("project name missing")
-			}
-			cmdModel.ProjectName = value
-
-			templateVar, err := cmd.Flags().GetString("template")
-			if err != nil {
-				return err
-			}
-			if len(templateVar) == 0 {
-				return errors.New("project template missing")
-			}
-			if contains(constants.TemplateArray, templateVar) == -1 {
-				return errors.New(fmt.Sprintf("project template support: %s", constants.TemplateArray))
-			}
-			repo, err := cmd.Flags().GetString("repo")
-			if err != nil {
-				return err
-			}
-			if len(value) == 0 {
-				return errors.New("project template repo missing")
-			}
-			repoIndex := contains(constants.TemplateRepoArray, repo)
-			if repoIndex == -1 {
-				return errors.New(fmt.Sprintf("project template repo support: %s", constants.TemplateRepoArray))
-			}
-			cmdModel.Template = constants.TemplateRepoMapped[templateVar][repoIndex]
-
-			value, err = cmd.Flags().GetString("version")
-			if err != nil {
-				return err
-			}
-			if len(value) == 0 {
-				return errors.New("project template version missing")
-			}
-			cmdModel.Tag = value
-			force, err := cmd.Flags().GetBool("force")
-			if err != nil {
-				return err
-			}
-			cmdModel.Force = force
-			value, err = cmd.Flags().GetString("path")
-			if err != nil {
-				return err
-			}
-			if len(value) == 0 {
-				return errors.New("project local path missing")
-			}
-			cmdModel.LocalPath = value
-			return template.Run(cmd, cmdModel)
+			_answers.Name = arg.String()
+			return template.Run(c, _answers.Convert())
 		},
 	}
 )
 
 func init() {
-	initCmd.Flags().StringVarP(&projectName, "name", "n", "", "project name")
-	initCmd.Flags().StringVarP(&templateStr, "template", "t", constants.TemplateArray[0], fmt.Sprintf("template: %s", constants.TemplateArray))
-	initCmd.Flags().StringVarP(&templateRepo, "repo", "r", constants.TemplateRepoArray[0], fmt.Sprintf("template repo: %s", constants.TemplateRepoArray))
-	initCmd.Flags().StringVarP(&templateVersion, "version", "v", constants.DefaultVersion, "template version")
-	initCmd.Flags().BoolVarP(&projectForce, "force", "f", false, "overwrite target directory if it exists")
-	initCmd.Flags().StringVarP(&localPath, "path", "p", constants.DefaultLocalPath, "create project local path")
-}
-func contains(array interface{}, val interface{}) (index int) {
-	index = -1
-	switch reflect.TypeOf(array).Kind() {
-	case reflect.Slice:
-		{
-			s := reflect.ValueOf(array)
-			for i := 0; i < s.Len(); i++ {
-				if reflect.DeepEqual(val, s.Index(i).Interface()) {
-					index = i
-					return
-				}
+	initCmd.StrVar(&_answers.Template, &gcli.FlagMeta{
+		Name:   "template",
+		Shorts: []string{"t"},
+		Desc:   "pure template",
+		DefVal: constants.TemplateArray[0],
+		Validator: func(val string) error {
+			if len(val) == 0 {
+				return errors.New("template is required")
 			}
-		}
-	}
-	return
+			if constants.Contains(constants.TemplateArray, val) == -1 {
+				return errors.New(fmt.Sprintf("template  supports: %s", constants.TemplateArray))
+			}
+			return nil
+		},
+	})
+	initCmd.StrVar(&_answers.Repo, &gcli.FlagMeta{
+		Name:   "repo",
+		Shorts: []string{"r"},
+		Desc:   "pure template repo",
+		DefVal: constants.TemplateRepoArray[0],
+		Validator: func(val string) error {
+			if len(val) == 0 {
+				return errors.New("template repo is required")
+			}
+			if constants.Contains(constants.TemplateRepoArray, val) == -1 {
+				return errors.New(fmt.Sprintf("template repo supports: %s", constants.TemplateRepoArray))
+			}
+			return nil
+		},
+	})
+	initCmd.StrVar(&_answers.Version, &gcli.FlagMeta{
+		Name:   "version",
+		Shorts: []string{"v"},
+		Desc:   "pure template version",
+		DefVal: constants.DefaultVersion,
+		Validator: func(val string) error {
+			if len(val) == 0 {
+				return errors.New("template version is required")
+			}
+			return nil
+		},
+	})
+	initCmd.StrVar(&_answers.LocalPath, &gcli.FlagMeta{
+		Name:   "path",
+		Shorts: []string{"p"},
+		Desc:   "project local path",
+		DefVal: constants.DefaultLocalPath,
+		Validator: func(val string) error {
+			if len(val) == 0 {
+				return errors.New("project local path is required")
+			}
+			return nil
+		},
+	})
+	initCmd.BoolVar(&_answers.Force, &gcli.FlagMeta{
+		Name:   "force",
+		Shorts: []string{"f"},
+		Desc:   "Overwrite target directory",
+		DefVal: false,
+		Validator: func(val string) error {
+			if len(val) == 0 {
+				return errors.New("force is required")
+			}
+			return nil
+		},
+	})
+	initCmd.BindArg(&gcli.Argument{
+		Name:     "name",
+		Desc:     "project name",
+		Required: true,
+		Validator: func(val interface{}) (interface{}, error) {
+			if val == nil {
+				return nil, errors.New("project name is required")
+			}
+			if len(val.(string)) == 0 {
+				return nil, errors.New("project name is required")
+			}
+			return val, nil
+		},
+	})
 }
