@@ -22,7 +22,8 @@ var (
 func executeShell(cmd *cobra.Command) error {
 	cmdModel := template.Command{}
 	projectNamePrompt := promptui.Prompt{
-		Label: "project name",
+		AllowEdit: true,
+		Label:     "project name",
 		Validate: func(s string) error {
 			if len(s) == 0 {
 				return errors.New("project name missing")
@@ -53,8 +54,9 @@ func executeShell(cmd *cobra.Command) error {
 	}
 	cmdModel.Template = constants.TemplateRepoMapped[projectTemplate][repoIndex]
 	templateVersionPrompt := promptui.Prompt{
-		Label:   "template version, default: " + constants.DefaultVersion,
-		Default: constants.DefaultVersion,
+		AllowEdit: true,
+		Label:     "template version",
+		Default:   constants.DefaultVersion,
 		Validate: func(s string) error {
 			if len(s) == 0 {
 				return errors.New("template version missing")
@@ -82,8 +84,9 @@ func executeShell(cmd *cobra.Command) error {
 	cmdModel.Force = isForce
 
 	pathPrompt := promptui.Prompt{
-		Label:   "create project path, default: " + constants.DefaultLocalPath,
-		Default: constants.DefaultLocalPath,
+		AllowEdit: true,
+		Label:     "create project path",
+		Default:   constants.DefaultLocalPath,
 		Validate: func(s string) error {
 			if len(s) == 0 {
 				return errors.New("project local path missing")
