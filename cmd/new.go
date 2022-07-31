@@ -10,13 +10,6 @@ import (
 )
 
 var (
-	//newCmd = &cobra.Command{
-	//	Use:   "new",
-	//	Short: "create a new project",
-	//	RunE: func(cmd *cobra.Command, args []string) error {
-	//		return executeShell(cmd)
-	//	},
-	//}
 	newCmd = &gcli.Command{
 		Name: "new",
 		Desc: "create a new project",
