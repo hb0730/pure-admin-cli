@@ -91,6 +91,7 @@ func init() {
 			return nil
 		},
 	})
+	//initCmd.Str("force", "f", "false", "Overwrite target directory")
 	initCmd.BindArg(&gcli.Argument{
 		Name:     "name",
 		Desc:     "project name",
