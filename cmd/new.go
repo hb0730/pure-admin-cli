@@ -2,99 +2,105 @@ package cmd
 
 import (
 	"errors"
-	"github.com/manifoldco/promptui"
-	"github.com/spf13/cobra"
+	"github.com/AlecAivazis/survey/v2"
+	"github.com/gookit/gcli/v3"
 	"pure-admin-cli/constants"
 	"pure-admin-cli/template"
-	"strconv"
+	"strings"
 )
 
 var (
-	newCmd = &cobra.Command{
-		Use:   "new",
-		Short: "create a new project",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			return executeShell(cmd)
+	//newCmd = &cobra.Command{
+	//	Use:   "new",
+	//	Short: "create a new project",
+	//	RunE: func(cmd *cobra.Command, args []string) error {
+	//		return executeShell(cmd)
+	//	},
+	//}
+	newCmd = &gcli.Command{
+		Name: "new",
+		Desc: "create a new project",
+		Func: func(c *gcli.Command, args []string) error {
+			return executeShell(c)
+		},
+	}
+	qs = []*survey.Question{
+		{
+			Name:   "name",
+			Prompt: &survey.Input{Message: "Project name:"},
+			Validate: func(ans interface{}) error {
+				if ans == nil {
+					return errors.New("value is required")
+				}
+				if len(strings.TrimSpace(ans.(string))) == 0 {
+					return errors.New("value is required")
+				}
+				return nil
+			},
+		},
+		{
+			Name: "template",
+			Prompt: &survey.Select{
+				Message: "Choose pure template:",
+				Options: constants.TemplateArray,
+				Default: constants.TemplateArray[0],
+			},
+		},
+		{
+			Name: "repo",
+			Prompt: &survey.Select{
+				Message: "Choose pure repo:",
+				Options: constants.TemplateRepoArray,
+				Default: constants.TemplateRepoArray[0],
+			},
+		},
+		{
+			Name: "version",
+			Prompt: &survey.Input{
+				Message: "Pure version:",
+				Default: "last",
+			},
+			Validate: func(ans interface{}) error {
+				if ans == nil {
+					return errors.New("value is required")
+				}
+				if len(strings.TrimSpace(ans.(string))) == 0 {
+					return errors.New("value is required")
+				}
+				return nil
+			},
+		},
+		{
+			Name: "localPath",
+			Prompt: &survey.Input{
+				Message: "Create project local path:",
+				Default: constants.DefaultLocalPath,
+			},
+			Validate: func(ans interface{}) error {
+				if ans == nil {
+					return errors.New("value is required")
+				}
+				if len(strings.TrimSpace(ans.(string))) == 0 {
+					return errors.New("value is required")
+				}
+				return nil
+			},
+		},
+		{
+			Name: "force",
+			Prompt: &survey.Confirm{
+				Message: "Overwrite target directory",
+				Default: false,
+			},
 		},
 	}
 )
 
-func executeShell(cmd *cobra.Command) error {
-	cmdModel := template.Command{}
-	projectNamePrompt := promptui.Prompt{
-		Label: "project name",
-		Validate: func(s string) error {
-			if len(s) == 0 {
-				return errors.New("project name missing")
-			}
-			return nil
-		},
-	}
-	projectName, err := projectNamePrompt.Run()
+func executeShell(cmd *gcli.Command) error {
+	answers := constants.Answers{}
+	err := survey.Ask(qs, &answers, survey.WithShowCursor(true))
 	if err != nil {
 		return err
 	}
-	cmdModel.ProjectName = projectName
-	templatePrompt := promptui.Select{
-		Label: "template",
-		Items: constants.TemplateArray,
-	}
-	_, projectTemplate, err := templatePrompt.Run()
-	if err != nil {
-		return err
-	}
-	templateRepoPrompt := promptui.Select{
-		Label: "template repo",
-		Items: constants.TemplateRepoArray,
-	}
-	repoIndex, _, err := templateRepoPrompt.Run()
-	if err != nil {
-		return err
-	}
-	cmdModel.Template = constants.TemplateRepoMapped[projectTemplate][repoIndex]
-	templateVersionPrompt := promptui.Prompt{
-		Label:   "template version, default: " + constants.DefaultVersion,
-		Default: constants.DefaultVersion,
-		Validate: func(s string) error {
-			if len(s) == 0 {
-				return errors.New("template version missing")
-			}
-			return nil
-		},
-	}
-	version, err := templateVersionPrompt.Run()
-	if err != nil {
-		return err
-	}
-	cmdModel.Tag = version
-	forcePrompt := promptui.Select{
-		Label: "overwrite target directory if it exists",
-		Items: []bool{false, true},
-	}
-	_, force, err := forcePrompt.Run()
-	if err != nil {
-		return err
-	}
-	isForce, err := strconv.ParseBool(force)
-	if err != nil {
-		return err
-	}
-	cmdModel.Force = isForce
-
-	pathPrompt := promptui.Prompt{
-		Label:   "create project path, default: " + constants.DefaultLocalPath,
-		Default: constants.DefaultLocalPath,
-		Validate: func(s string) error {
-			if len(s) == 0 {
-				return errors.New("project local path missing")
-			}
-			return nil
-		},
-	}
-	localPathStr, err := pathPrompt.Run()
-	if err != nil {
-		return err
-	}
-	cmdModel.LocalPath = localPathStr
-	return template.Run(cmd, cmdModel)
+	return template.Run(cmd, answers.Convert())
 }

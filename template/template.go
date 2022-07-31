@@ -5,21 +5,13 @@ import (
 	"fmt"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
-	"github.com/spf13/cobra"
+	"github.com/gookit/gcli/v3"
 	"os"
 	"path/filepath"
 	"pure-admin-cli/constants"
 )
 
-type Command struct {
-	ProjectName string
-	Template    constants.GitTemplate
-	Tag         string
-	LocalPath   string
-	Force       bool
-}
-
-func Run(cmd *cobra.Command, cmdModel Command) error {
+func Run(cmd *gcli.Command, cmdModel constants.Command) error {
 	cmd.Println("Start clone pure template ...")
 	// 规范化路径
 	localPath := filepath.Clean(cmdModel.LocalPath)
@@ -37,7 +29,7 @@ func Run(cmd *cobra.Command, cmdModel Command) error {
 	}
 	return err
 }
-func createDir(cmd *cobra.Command, localPath string, isForce bool) (bool, error) {
+func createDir(cmd *gcli.Command, localPath string, isForce bool) (bool, error) {
 	if len(localPath) == 0 {
 		return false, errors.New("local path missing")
 	}
@@ -59,16 +51,19 @@ func createDir(cmd *cobra.Command, localPath string, isForce bool) (bool, error)
 			return false, errors.New("clean local dir error")
 		}
 		cmd.Println("Clean dir success ...")
+		return true, nil
+	} else {
+		cmd.Println("Skip clone template")
 	}
-	return true, nil
+	return false, nil
 }
-func clone(cmd *cobra.Command, localPath, version string, template constants.GitTemplate) (err error) {
+func clone(cmd *gcli.Command, localPath, version string, template constants.GitTemplate) (err error) {
 	cmd.Println(fmt.Sprintf("Clone template: %s  version: %s  branch: %s local path: %s",
 		template.DownloadUrl, version, template.Branch, localPath))
 	// 是克隆branch还是tag
 	gitOptions := &git.CloneOptions{
 		URL:          template.DownloadUrl,
-		Progress:     cmd.OutOrStdout(),
+		Progress:     os.Stdout,
 		SingleBranch: true,
 	}
 	if template.IsBranch {

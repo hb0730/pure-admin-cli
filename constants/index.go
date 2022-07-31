@@ -1,10 +1,41 @@
 package constants
 
+import "reflect"
+
 type GitTemplate struct {
 	DownloadUrl string
 	Description string
 	Branch      string
 	IsBranch    bool
+}
+
+type Answers struct {
+	Name      string
+	Template  string
+	Repo      string
+	Version   string
+	LocalPath string
+	Force     bool
+}
+
+func (a Answers) Convert() Command {
+	cmdModel := Command{
+		ProjectName: a.Name,
+		Tag:         a.Version,
+		LocalPath:   a.LocalPath,
+		Force:       a.Force,
+	}
+	repoIndex := Contains(TemplateRepoArray, a.Repo)
+	cmdModel.Template = TemplateRepoMapped[a.Template][repoIndex]
+	return cmdModel
+}
+
+type Command struct {
+	ProjectName string
+	Template    GitTemplate
+	Tag         string
+	LocalPath   string
+	Force       bool
 }
 
 var (
@@ -71,3 +102,20 @@ var (
 	DefaultVersion   = "last"
 	DefaultLocalPath = "./"
 )
+
+func Contains(array interface{}, val interface{}) (index int) {
+	index = -1
+	switch reflect.TypeOf(array).Kind() {
+	case reflect.Slice:
+		{
+			s := reflect.ValueOf(array)
+			for i := 0; i < s.Len(); i++ {
+				if reflect.DeepEqual(val, s.Index(i).Interface()) {
+					index = i
+					return
+				}
+			}
+		}
+	}
+	return
+}
