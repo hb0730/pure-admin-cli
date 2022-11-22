@@ -45,3 +45,7 @@ sudo ./pure-cli new
 ```base
 sudo ./pure-cli -h
 ```
+
+# question！
+* mac安装提示“来自身份不明开发者软件
+ ![img.png](https://raw.githubusercontent.com/hb0730/pure-admin-cli/main/doc/img.png)
