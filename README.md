@@ -1,7 +1,10 @@
 # pure admin cli
 
 用于快速构建基于vue-pure-admin项目的命令行工具
-
+# Build
+```go
+go build -o pure-cli
+```
 # 方式
 
 * 命令式
@@ -10,13 +13,13 @@
 ## 命令式
 
 ```base
-./pure init
+sudo ./pure-cli init
 ```
 
 ### example
 
 ```base
-./pure init -t thin -r gitee -v last -p ./ -f vue-test
+sudo ./pure-cli init -t thin -r gitee -v last -p ./ -f vue-test
 ```
 
 ### Flag Options:
@@ -34,11 +37,11 @@
 ## 交互式
 
 ```base
-./pure new
+sudo ./pure-cli new
 ```
 
 
 ## 查看帮助
 ```base
-./pure -h
+sudo ./pure-cli -h
 ```

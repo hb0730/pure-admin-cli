@@ -39,7 +39,7 @@ type Command struct {
 }
 
 var (
-	TemplateArray      = []string{"thin", "no-i18n", "tauri", "admin"}
+	TemplateArray      = []string{"thin", "i18n", "tauri", "electron", "admin"}
 	TemplateRepoArray  = []string{"github", "gitee"}
 	TemplateRepoMapped = map[string][]GitTemplate{
 		"thin": {
