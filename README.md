@@ -21,7 +21,7 @@
 
 ### Flag Options:
 
-- `-t`,`--template`: 需要克隆的模板: `thin`,`no-i18n`,`tauri`,`admin`,默认:`thin`
+- `-t`,`--template`: 需要克隆的模板: `thin`,`i18n`,`tauri`,`electron`,`admin`,默认:`thin`
 - `-r`,`--repo`: 需要克隆的地址: `gitee`,`github`,默认: `github`
 - `-v`,`--version`: 克隆的版本,默认`last`,如果选择的的模板是分支类型,则该命令无效
 - `-p`,`--path`: 本地目录:默认:`./`
